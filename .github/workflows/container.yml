@@ -1,6 +1,6 @@
 name: Build container
 # Builds ghcr.io/drevalpy/curate:<manifest.version>, the container of every process, against
-# the drevalpy git ref in DREVALPY_REF (or the ref given when dispatched manually).
+# the drevalpy git ref in DREVALPY_REF, or the ref given when dispatched manually.
 on:
   release:
     types: [published]
