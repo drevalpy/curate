@@ -88,7 +88,7 @@ For more details, see the [usage documentation](docs/usage.md) and the [paramete
 
 ## Credits
 
-drevalpy/curate was originally written by the drevalpy developers.
+drevalpy/curate was originally written by Nico Trummer ([@nictru](https://github.com/nictru)), Judith Bernett ([@JudithBernett](https://github.com/JudithBernett)) and Pascal Iversen ([@PascalIversen](https://github.com/PascalIversen)).
 
 ## Contributions and Support
 
