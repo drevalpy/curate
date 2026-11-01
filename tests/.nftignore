@@ -1,2 +1,3 @@
 .DS_Store
+curves/*.h5ad
 pipeline_info/*.{html,json,txt,yml}
