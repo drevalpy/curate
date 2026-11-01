@@ -178,7 +178,7 @@ To change the resource requests, please see the [max resources](https://nf-co.re
 
 ### Custom Containers
 
-Every process runs in the `ghcr.io/drevalpy/curate:<version>` container, built from the [`Dockerfile`](../Dockerfile) of the pipeline against the drevalpy release named in [`DREVALPY_REF`](../DREVALPY_REF). To run another drevalpy version, build the image against another drevalpy ref, given as the build argument `DREVALPY_REF` (a tag, branch or commit of daisybio/drevalpy):
+Every process runs in the `ghcr.io/drevalpy/curate:<version>` container, built from the [`Dockerfile`](../Dockerfile) of the pipeline against the drevalpy ref pinned there as `DREVALPY_REF`. To run another drevalpy version, build the image against another drevalpy ref, given as the build argument `DREVALPY_REF` (a tag, branch or commit of daisybio/drevalpy):
 
 ```bash
 docker build --build-arg DREVALPY_REF=<ref> -t my-registry/curate:dev .
