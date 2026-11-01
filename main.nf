@@ -28,7 +28,7 @@ include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_cura
 workflow DREVALPY_CURATE {
 
     take:
-    samplesheet // channel: samplesheet read in from --input
+    wells // channel: the well table given with --input
 
     main:
 
@@ -36,7 +36,7 @@ workflow DREVALPY_CURATE {
     // WORKFLOW: Run pipeline
     //
     CURATE (
-        samplesheet,
+        wells,
         params.outdir,
     )
 }
@@ -68,7 +68,7 @@ workflow {
     // WORKFLOW: Run main workflow
     //
     DREVALPY_CURATE (
-        PIPELINE_INITIALISATION.out.samplesheet
+        PIPELINE_INITIALISATION.out.wells
     )
     //
     // SUBWORKFLOW: Run completion tasks

@@ -1,16 +1,15 @@
 process DREVALPY_CURATEPLAN {
-    tag "${meta.id}"
     label 'process_single'
     label 'process_drevalpy_whole_screen'
 
     container "ghcr.io/drevalpy/curate:${workflow.manifest.version}"
 
     input:
-    tuple val(meta), path(wells)
+    path(wells)
 
     output:
-    tuple val(meta), path("plan")                          , emit: plan
-    tuple val(meta), path("plan/chunks/*.parquet")         , emit: chunks, optional: true
+    path("plan")                 , emit: plan
+    path("plan/chunks/*.parquet"), emit: chunks, optional: true
     tuple val("${task.process}"), val('drevalpy'), eval("drevalpy --version | sed 's/^drevalpy //'"), emit: versions_drevalpy, topic: versions
     tuple val("${task.process}"), val('curve-curator'), eval("python -c 'import importlib.metadata as m; print(m.version(\"curve-curator\"))'"), emit: versions_curvecurator, topic: versions
 

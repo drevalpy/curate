@@ -6,7 +6,7 @@ Many thanks for contributing to drevalpy/curate!
 Please fill in the appropriate checklist below (delete whatever is not relevant).
 These are the most common things requested on pull requests (PRs).
 
-Remember that PRs should be made against the dev branch, unless you're preparing a pipeline release.
+PRs go against the master branch.
 
 Learn more about contributing: [CONTRIBUTING.md](https://github.com/drevalpy/curate/tree/master/docs/CONTRIBUTING.md)
 -->

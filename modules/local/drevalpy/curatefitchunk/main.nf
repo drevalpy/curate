@@ -1,5 +1,5 @@
 process DREVALPY_CURATEFITCHUNK {
-    tag "${meta.id}:${chunk.baseName}"
+    tag "${chunk.baseName}"
     label 'process_single'
     label 'process_drevalpy_chunk'
     // A chunk file holds its curves and fit options and nothing else, so hashing its content
@@ -9,10 +9,10 @@ process DREVALPY_CURATEFITCHUNK {
     container "ghcr.io/drevalpy/curate:${workflow.manifest.version}"
 
     input:
-    tuple val(meta), path(chunk)
+    path(chunk)
 
     output:
-    tuple val(meta), path("fitted/${chunk.name}"), emit: fitted
+    path("fitted/${chunk.name}"), emit: fitted
     tuple val("${task.process}"), val('drevalpy'), eval("drevalpy --version | sed 's/^drevalpy //'"), emit: versions_drevalpy, topic: versions
 
     when:

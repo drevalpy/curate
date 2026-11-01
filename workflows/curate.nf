@@ -17,7 +17,7 @@ include { softwareVersionsToYAML  } from '../subworkflows/nf-core/utils_nfcore_p
 workflow CURATE {
 
     take:
-    ch_samplesheet // channel: [ val(meta), path(wells) ], one per screen
+    wells  // channel: path(wells), the screen's well table
     outdir
 
     main:
@@ -25,41 +25,25 @@ workflow CURATE {
     def ch_versions = channel.empty()
 
     //
-    // MODULE: Split each screen into chunks of curves
+    // MODULE: Split the screen into chunks of curves
     //
     DREVALPY_CURATEPLAN (
-        ch_samplesheet
+        wells
     )
 
-    def ch_chunks = DREVALPY_CURATEPLAN.out.chunks
-        .map { meta, chunks -> [ meta, chunks instanceof List ? chunks : [ chunks ] ] }
-
     //
-    // MODULE: Fit every chunk as its own task. Only the screen id goes with the chunk, so a
-    // changed per-screen option that leaves a chunk's content alone does not refit it.
+    // MODULE: Fit every chunk as its own task
     //
     DREVALPY_CURATEFITCHUNK (
-        ch_chunks.flatMap { meta, chunks -> chunks.collect { chunk -> [ [ id: meta.id ], chunk ] } }
+        DREVALPY_CURATEPLAN.out.chunks.flatten()
     )
 
-    def ch_n_chunks = ch_chunks.map { meta, chunks -> [ meta.id, chunks.size() ] }
-    def ch_fitted = DREVALPY_CURATEFITCHUNK.out.fitted
-        .map { meta, fitted -> [ meta.id, fitted ] }
-        .combine(ch_n_chunks, by: 0)
-        .map { id, fitted, n_chunks -> [ groupKey(id, n_chunks), fitted ] }
-        .groupTuple()
-        .map { key, fitted -> [ key.getGroupTarget(), fitted ] }
-
     //
-    // MODULE: Assemble the fitted chunks of each screen into its curve AnnData
+    // MODULE: Assemble the fitted chunks into the curve AnnData
     //
-    def ch_collect = DREVALPY_CURATEPLAN.out.plan
-        .map { meta, plan -> [ meta.id, meta, plan ] }
-        .join(ch_fitted, remainder: true)
-        .map { id, meta, plan, fitted -> [ meta, plan, fitted ?: [] ] }
-
     DREVALPY_CURATECOLLECT (
-        ch_collect
+        DREVALPY_CURATEPLAN.out.plan,
+        DREVALPY_CURATEFITCHUNK.out.fitted.collect().ifEmpty([])
     )
 
     //
@@ -91,7 +75,7 @@ workflow CURATE {
             newLine: true
         )
     emit:
-    curves         = DREVALPY_CURATECOLLECT.out.curves // channel: [ val(meta), path(h5ad) ]
+    curves         = DREVALPY_CURATECOLLECT.out.curves // channel: path(h5ad)
     versions       = ch_versions                       // channel: [ path(versions.yml) ]
 }
 

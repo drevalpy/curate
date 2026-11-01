@@ -11,9 +11,9 @@
 
 ## Introduction
 
-**drevalpy/curate** fits the dose-response curves of drug screens with [drevalpy](https://drevalpy.readthedocs.io) and [CurveCurator](https://github.com/kusterlab/curve_curator). It takes one well-level table per screen (sample, drug, concentration and viability) and writes, per screen, an [AnnData](https://anndata.readthedocs.io) file of samples × drugs holding pEC50, EC50, IC50, AUC and the fit statistics of every curve.
+**drevalpy/curate** fits the dose-response curves of drug screens with [drevalpy](https://drevalpy.readthedocs.io) and [CurveCurator](https://github.com/kusterlab/curve_curator). It takes the well-level table of one screen (sample, drug, concentration and viability) and writes an [AnnData](https://anndata.readthedocs.io) file of samples × drugs holding pEC50, EC50, IC50, AUC and the fit statistics of every curve.
 
-Each screen is split into chunks of curves that are fitted as independent single-core tasks, so a screen with hundreds of thousands of curves spreads across any Nextflow executor (local, SLURM, AWS Batch, ...). A rerun with `-resume` only refits the chunks whose curves changed. The result is identical to `drevalpy curate run` on the same table.
+The screen is split into chunks of curves that are fitted as independent single-core tasks, so a screen with hundreds of thousands of curves spreads across any Nextflow executor (local, SLURM, AWS Batch, ...). A rerun with `-resume` only refits the chunks whose curves changed. The result is identical to `drevalpy curate run` on the same table.
 
 1. Plan the screen: validate the wells, optionally normalize them, and split the curves into chunks (`drevalpy curate plan`)
 2. Fit every chunk as its own task (`drevalpy curate fit-chunk`)
@@ -26,24 +26,14 @@ With `--replicate_fits`, every dose series (each biological and technical replic
 > [!NOTE]
 > If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/get_started/environment_setup/overview) on how to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/get_started/run-your-first-pipeline) with `-profile test` before running the workflow on actual data.
 
-First, prepare a samplesheet with one row per screen:
-
-`samplesheet.csv`:
-
-```csv
-id,wells,normalize,metadata
-GDSC2,/path/to/wells/GDSC2.parquet,false,date;barcode
-PRISM,/path/to/wells/PRISM.parquet,true,
-```
-
-Each `wells` file is a CSV or Parquet table with one row per well and the columns `sample`, `drug`, `concentration` (µM) and `intensity` (viability relative to the untreated control), and optionally `experiment`, `replicate` and `position`. See the [usage documentation](docs/usage.md) for all columns.
+The input is a CSV or Parquet table with one row per well and the columns `sample`, `drug`, `concentration` (µM) and `intensity` (viability relative to the untreated control), and optionally `experiment`, `replicate` and `position`. See the [usage documentation](docs/usage.md) for all columns.
 
 Now, you can run the pipeline using:
 
 ```bash
 nextflow run drevalpy/curate \
    -profile <docker/singularity/.../institute> \
-   --input samplesheet.csv \
+   --input wells.parquet \
    --outdir <OUTDIR>
 ```
 
@@ -74,12 +64,12 @@ workDir    = 's3://my-bucket/curate/work'
 nextflow run drevalpy/curate -r <version> \
    -profile singularity \
    -c slurm.config \
-   --input samplesheet.csv \
+   --input wells.parquet \
    --outdir results \
    -resume
 ```
 
-`-resume` reuses every chunk that has been fitted before, also after the wells of a screen changed. The same curves give the same fits on any x86-64 node with AVX2, so a mixed Intel/AMD cluster, or resuming on another machine, does not change the results.
+`-resume` reuses every chunk that has been fitted before, also after some wells of the screen changed. The same curves give the same fits on any x86-64 node with AVX2, so a mixed Intel/AMD cluster, or resuming on another machine, does not change the results.
 
 > [!WARNING]
 > Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_; see [docs](https://nf-co.re/docs/running/run-pipelines#using-parameter-files).

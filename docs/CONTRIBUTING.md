@@ -27,7 +27,7 @@ To contribute code to any nf-core pipeline:
 - [ ] Update relevant documentation within the `docs/` folder, use nf-core/tools to update `nextflow_schema.json`, and update `CITATIONS.md`.
 - [ ] Run and/or update tests. See [Testing](#testing) for more information.
 - [ ] [Lint](#lint-tests) your code with nf-core/tools.
-- [ ] Submit a pull request (PR) against the `dev` branch and request a review.
+- [ ] Submit a pull request (PR) against the `master` branch and request a review.
 
 If you are not used to this workflow with Git, see the [GitHub documentation](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests) or [Git resources](https://try.github.io/) for more information.
 
@@ -161,7 +161,7 @@ or by running the `Build container` GitHub Actions workflow, which also runs on 
 
 ### Test data
 
-The test samplesheet [`assets/test/samplesheet.csv`](../assets/test/samplesheet.csv) points to the well tables on the `dev` branch on GitHub, so that `-profile test` works without a checkout. The nf-test test in [`tests/default.nf.test`](../tests/default.nf.test) rewrites those URLs to the checked-out files, so it also tests well tables that are not pushed yet. Run it with:
+The `test` profile fits [`assets/test/replicated_wells.csv`](../assets/test/replicated_wells.csv); the nf-test tests in [`tests/default.nf.test`](../tests/default.nf.test) also fit [`assets/test/wells.csv`](../assets/test/wells.csv) with `--normalize`. Run it with:
 
 ```bash
 nf-test test --profile test,docker

@@ -13,13 +13,11 @@
                     "drevalpy": "2.0.0"
                 },
                 "Workflow": {
-                    "drevalpy/curate": "v0.1.0dev"
+                    "drevalpy/curate": "v0.1.0"
                 }
             },
             [
-                "curves",
-                "curves/replicated.h5ad",
-                "curves/screen.h5ad",
+                "curves.h5ad",
                 "pipeline_info",
                 "pipeline_info/curate_software_versions.yml"
             ],
@@ -27,7 +25,7 @@
                 
             ]
         ],
-        "timestamp": "2026-11-01T14:09:28.899222725",
+        "timestamp": "2026-11-01T21:11:22.958052274",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.4"
