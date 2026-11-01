@@ -20,6 +20,9 @@ lint:
     - manifest.name
     - manifest.homePage
   multiqc_config: false
+  # The test data lives in assets/test/, not in nf-core/test-datasets
+  nf_test_content:
+    - tests/nextflow.config
   files_exist:
     - conf/igenomes.config
     - conf/igenomes_ignored.config

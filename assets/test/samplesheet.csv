@@ -1,0 +1,3 @@
+id,wells,normalize,metadata
+screen,https://raw.githubusercontent.com/drevalpy/curate/dev/assets/test/wells.csv,false,
+replicated,https://raw.githubusercontent.com/drevalpy/curate/dev/assets/test/replicated_wells.csv,false,plate_date
