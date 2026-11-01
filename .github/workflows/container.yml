@@ -1,13 +1,13 @@
 name: Build container
 # Builds ghcr.io/drevalpy/curate:<manifest.version>, the container of every process, against
-# the drevalpy git ref in DREVALPY_REF, or the ref given when dispatched manually.
+# the drevalpy ref pinned in the Dockerfile, or the ref given when dispatched manually.
 on:
   release:
     types: [published]
   workflow_dispatch:
     inputs:
       drevalpy_ref:
-        description: "drevalpy git ref (tag, branch or commit) to build against. Defaults to the content of DREVALPY_REF."
+        description: "drevalpy git ref (tag, branch or commit) to build against. Defaults to the DREVALPY_REF pinned in the Dockerfile."
         required: false
         default: ""
 
@@ -42,7 +42,7 @@ jobs:
             echo "::error::Release tag $RELEASE_TAG does not match manifest.version $version"
             exit 1
           fi
-          ref="${INPUT_REF:-$(tr -d '[:space:]' < DREVALPY_REF)}"
+          ref="${INPUT_REF:-$(sed -n 's/^ARG DREVALPY_REF=//p' Dockerfile)}"
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "drevalpy_ref=$ref" >> "$GITHUB_OUTPUT"
           echo "Building ghcr.io/drevalpy/curate:$version against drevalpy $ref" >> "$GITHUB_STEP_SUMMARY"
