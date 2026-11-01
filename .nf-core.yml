@@ -1,0 +1,58 @@
+repository_type: pipeline
+
+nf_core_version: 4.2.1
+
+lint:
+  files_unchanged:
+    - CODE_OF_CONDUCT.md
+    - assets/nf-core-curate_logo_light.png
+    - docs/images/nf-core-curate_logo_light.png
+    - docs/images/nf-core-curate_logo_dark.png
+    - .github/ISSUE_TEMPLATE/bug_report.yml
+    - .github/PULL_REQUEST_TEMPLATE.md
+    - assets/email_template.txt
+    - docs/README.md
+    - docs/CONTRIBUTING.md
+    - .prettierignore
+    - assets/sendmail_template.txt
+    - .prettierignore
+  nextflow_config:
+    - manifest.name
+    - manifest.homePage
+  multiqc_config: false
+  files_exist:
+    - conf/igenomes.config
+    - conf/igenomes_ignored.config
+    - CODE_OF_CONDUCT.md
+    - assets/nf-core-curate_logo_light.png
+    - docs/images/nf-core-curate_logo_light.png
+    - docs/images/nf-core-curate_logo_dark.png
+    - .github/ISSUE_TEMPLATE/config.yml
+    - .github/workflows/awstest.yml
+    - .github/workflows/awsfulltest.yml
+    - assets/email_template.html
+    - assets/sendmail_template.txt
+    - assets/email_template.txt
+    - assets/multiqc_config.yml
+
+template:
+  org: drevalpy
+  name: curate
+  description: Fit dose-response curves of drug screens with drevalpy and CurveCurator,
+    chunk by chunk on any Nextflow executor
+  author: drevalpy developers
+  version: 0.1.0dev
+  force: true
+  outdir: curate
+  skip_features:
+    - igenomes
+    - multiqc
+    - fastqc
+    - codespaces
+    - vscode
+    - gpu
+    - email
+    - seqera_platform
+    - rocrate
+    - is_nfcore
+  is_nfcore: false
