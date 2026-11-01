@@ -58,9 +58,8 @@ jobs:
       - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: .
-          build-contexts: |
-            drevalpy=https://github.com/daisybio/drevalpy.git#${{ steps.refs.outputs.drevalpy_ref }}
-          # OPENBLAS_CORETYPE=Haswell pins an x86-64 kernel, so the image is amd64 only
+          build-args: DREVALPY_REF=${{ steps.refs.outputs.drevalpy_ref }}
+          # OPENBLAS_CORETYPE=Haswell (nextflow.config) pins an x86-64 kernel, so the image is amd64 only
           platforms: linux/amd64
           push: true
           tags: ghcr.io/drevalpy/curate:${{ steps.refs.outputs.version }}
