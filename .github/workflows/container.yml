@@ -1,0 +1,73 @@
+name: Build container
+# Builds ghcr.io/drevalpy/curate:<manifest.version>, the container of every process, against
+# the drevalpy git ref in DREVALPY_REF (or the ref given when dispatched manually).
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      drevalpy_ref:
+        description: "drevalpy git ref (tag, branch or commit) to build against. Defaults to the content of DREVALPY_REF."
+        required: false
+        default: ""
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  container:
+    name: Build and push container
+    if: github.repository == 'drevalpy/curate'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Get pipeline version and drevalpy ref
+        id: refs
+        env:
+          INPUT_REF: ${{ inputs.drevalpy_ref }}
+          EVENT_NAME: ${{ github.event_name }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          version=$(sed -n "s/^ *version *= *'\(.*\)'.*$/\1/p" nextflow.config)
+          if [[ -z "$version" ]]; then
+            echo "::error::Could not read manifest.version from nextflow.config"
+            exit 1
+          fi
+          if [[ "$EVENT_NAME" == "release" && "${RELEASE_TAG#v}" != "$version" ]]; then
+            echo "::error::Release tag $RELEASE_TAG does not match manifest.version $version"
+            exit 1
+          fi
+          ref="${INPUT_REF:-$(tr -d '[:space:]' < DREVALPY_REF)}"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "drevalpy_ref=$ref" >> "$GITHUB_OUTPUT"
+          echo "Building ghcr.io/drevalpy/curate:$version against drevalpy $ref" >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 # v4.7.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          build-contexts: |
+            drevalpy=https://github.com/daisybio/drevalpy.git#${{ steps.refs.outputs.drevalpy_ref }}
+          # OPENBLAS_CORETYPE=Haswell pins an x86-64 kernel, so the image is amd64 only
+          platforms: linux/amd64
+          push: true
+          tags: ghcr.io/drevalpy/curate:${{ steps.refs.outputs.version }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.version=${{ steps.refs.outputs.version }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.description=drevalpy/curate container, drevalpy ${{ steps.refs.outputs.drevalpy_ref }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

@@ -19,8 +19,8 @@
                     "schema": "assets/schema_input.json",
                     "mimetype": "text/csv",
                     "pattern": "^\\S+\\.csv$",
-                    "description": "Path to comma-separated file containing information about the samples in the experiment.",
-                    "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row.",
+                    "description": "Path to a comma-separated file with one row per screen: id, wells and optionally normalize and metadata.",
+                    "help_text": "See docs/usage.md for the columns. Each wells table needs sample, drug, concentration and intensity, and may have experiment, replicate and position.",
                     "fa_icon": "fas fa-file-csv"
                 },
                 "outdir": {
@@ -28,6 +28,43 @@
                     "format": "directory-path",
                     "description": "The output directory where the results will be saved. You have to use absolute paths to storage on Cloud infrastructure.",
                     "fa_icon": "fas fa-folder-open"
+                }
+            }
+        },
+        "fitting_options": {
+            "title": "Curve fitting options",
+            "type": "object",
+            "fa_icon": "fas fa-chart-line",
+            "description": "How every curve of every screen is fitted. Per-screen options (normalize, metadata) are columns of the samplesheet.",
+            "properties": {
+                "replicate_fits": {
+                    "type": "boolean",
+                    "description": "Also fit every dose series on its own, into uns[\"replicate_fits\"].",
+                    "help_text": "Shows how well the replicates of a pair agree. The pooled fit is unchanged.",
+                    "fa_icon": "fas fa-clone"
+                },
+                "min_doses": {
+                    "type": "integer",
+                    "default": 4,
+                    "minimum": 1,
+                    "description": "Minimum number of distinct doses for a series to be fitted.",
+                    "fa_icon": "fas fa-filter"
+                },
+                "fit_speed": {
+                    "type": "string",
+                    "default": "exhaustive",
+                    "enum": ["fast", "standard", "exhaustive", "basinhopping"],
+                    "description": "CurveCurator fitting thoroughness.",
+                    "help_text": "Use exhaustive for published results: fast takes a single shot from one initial guess.",
+                    "fa_icon": "fas fa-tachometer-alt"
+                },
+                "max_chunk_size": {
+                    "type": "integer",
+                    "default": 2000,
+                    "minimum": 1,
+                    "description": "Maximum number of curves fitted in one task.",
+                    "help_text": "The unit of parallel work and of -resume. The result does not depend on it, but changing it refits every chunk.",
+                    "fa_icon": "fas fa-cubes"
                 }
             }
         },
@@ -114,13 +151,6 @@
                     "fa_icon": "fas fa-check-square",
                     "hidden": true
                 },
-                "pipelines_testdata_base_path": {
-                    "type": "string",
-                    "fa_icon": "far fa-check-circle",
-                    "description": "Base URL or local path to location of pipeline test dataset files",
-                    "default": "https://raw.githubusercontent.com/nf-core/test-datasets/",
-                    "hidden": true
-                },
                 "trace_report_suffix": {
                     "type": "string",
                     "fa_icon": "far fa-calendar",
@@ -145,6 +175,9 @@
     "allOf": [
         {
             "$ref": "#/$defs/input_output_options"
+        },
+        {
+            "$ref": "#/$defs/fitting_options"
         },
         {
             "$ref": "#/$defs/institutional_config_options"

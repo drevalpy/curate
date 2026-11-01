@@ -2,32 +2,39 @@
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://raw.githubusercontent.com/drevalpy/curate/master/assets/schema_input.json",
     "title": "drevalpy/curate pipeline - params.input schema",
-    "description": "Schema for the file provided with params.input",
+    "description": "Schema for the file provided with params.input: one row per screen",
     "type": "array",
     "items": {
         "type": "object",
         "properties": {
-            "sample": {
+            "id": {
                 "type": "string",
-                "pattern": "^\\S+$",
-                "errorMessage": "Sample name must be provided and cannot contain spaces",
+                "pattern": "^[A-Za-z0-9._-]+$",
+                "errorMessage": "Screen id must be provided and may only contain letters, digits, '.', '_' and '-'",
                 "meta": ["id"]
             },
-            "fastq_1": {
+            "wells": {
                 "type": "string",
                 "format": "file-path",
                 "exists": true,
-                "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.f(ast)?q\\.gz$",
-                "errorMessage": "FastQ file for reads 1 must be provided, cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
+                "pattern": "^\\S+\\.(csv|parquet|pq)$",
+                "errorMessage": "Well table must be provided, cannot contain spaces and must have extension '.csv', '.parquet' or '.pq'"
             },
-            "fastq_2": {
+            "normalize": {
+                "type": "boolean",
+                "default": false,
+                "errorMessage": "normalize must be true or false",
+                "meta": ["normalize"]
+            },
+            "metadata": {
                 "type": "string",
-                "format": "file-path",
-                "exists": true,
-                "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.f(ast)?q\\.gz$",
-                "errorMessage": "FastQ file for reads 2 cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
+                "pattern": "^([^;\\s]+(;[^;\\s]+)*)?$",
+                "default": "",
+                "errorMessage": "metadata must be a ';'-separated list of column names without spaces",
+                "meta": ["metadata"]
             }
         },
-        "required": ["sample", "fastq_1"]
+        "required": ["id", "wells"],
+        "uniqueEntries": ["id"]
     }
 }

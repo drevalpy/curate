@@ -31,10 +31,6 @@ To contribute code to any nf-core pipeline:
 
 If you are not used to this workflow with Git, see the [GitHub documentation](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests) or [Git resources](https://try.github.io/) for more information.
 
-
-
-
-
 ### Testing
 
 Once you have made your changes, run the pipeline with nf-test to test them locally.
@@ -153,4 +149,20 @@ If you update images or graphics, follow the nf-core [style guidelines](https://
 
 ## Pipeline specific contribution guidelines
 
-<!-- TODO nf-core: Add any pipeline specific contribution guidelines here, such as coding styles, procedures, checklists etc. -->
+### Container
+
+Every process runs in `ghcr.io/drevalpy/curate:<manifest.version>`, built from the [`Dockerfile`](../Dockerfile) against the drevalpy git ref in [`DREVALPY_REF`](../DREVALPY_REF). `DREVALPY_REF` holds a single git ref, currently `v2.0.0`, which is a placeholder until drevalpy 2.0.0 is released. To move the pipeline to another drevalpy release, change `DREVALPY_REF` and rebuild the image, locally with
+
+```bash
+docker build --build-context drevalpy=https://github.com/daisybio/drevalpy.git#$(cat DREVALPY_REF) -t ghcr.io/drevalpy/curate:<version> .
+```
+
+or by running the `Build container` GitHub Actions workflow, which also runs on every release.
+
+### Test data
+
+The test samplesheet [`assets/test/samplesheet.csv`](../assets/test/samplesheet.csv) points to the well tables on the `dev` branch on GitHub, so that `-profile test` works without a checkout. The nf-test test in [`tests/default.nf.test`](../tests/default.nf.test) rewrites those URLs to the checked-out files, so it also tests well tables that are not pushed yet. Run it with:
+
+```bash
+nf-test test --profile test,docker
+```
