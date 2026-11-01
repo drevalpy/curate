@@ -33,6 +33,7 @@ lint:
     - .github/ISSUE_TEMPLATE/config.yml
     - .github/workflows/awstest.yml
     - .github/workflows/awsfulltest.yml
+    - .github/workflows/branch.yml
     - assets/email_template.html
     - assets/sendmail_template.txt
     - assets/email_template.txt
@@ -44,7 +45,7 @@ template:
   description: Fit dose-response curves of drug screens with drevalpy and CurveCurator,
     chunk by chunk on any Nextflow executor
   author: Nico Trummer, Judith Bernett, Pascal Iversen
-  version: 0.1.0dev
+  version: 0.1.0
   force: true
   outdir: curate
   skip_features:

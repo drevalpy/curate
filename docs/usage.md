@@ -4,34 +4,25 @@
 
 ## Introduction
 
-drevalpy/curate fits the dose-response curves of one or more drug screens with [drevalpy](https://drevalpy.readthedocs.io) and [CurveCurator](https://github.com/kusterlab/curve_curator). Every screen is split into chunks of at most `--max_chunk_size` curves, each chunk is fitted as a single-core task, and the fitted chunks are collected into one AnnData file per screen (see the [output documentation](output.md)). The result is identical to `drevalpy curate run` on the same well table.
+drevalpy/curate fits the dose-response curves of a drug screen with [drevalpy](https://drevalpy.readthedocs.io) and [CurveCurator](https://github.com/kusterlab/curve_curator). The screen is split into chunks of at most `--max_chunk_size` curves, each chunk is fitted as a single-core task, and the fitted chunks are collected into one AnnData file (see the [output documentation](output.md)). The result is identical to `drevalpy curate run` on the same well table.
 
-## Samplesheet input
+## Input
 
-You will need to create a samplesheet with one row per screen. Use this parameter to specify its location. It has to be a comma-separated file with a header row and the columns shown below.
+The pipeline fits one screen per run, given as its well table:
 
 ```bash
---input '[path to samplesheet file]'
+--input '[path to the well table]'
 ```
 
-```csv title="samplesheet.csv"
-id,wells,normalize,metadata
-GDSC2,/path/to/wells/GDSC2.parquet,false,date;barcode
-PRISM,/path/to/wells/PRISM.parquet,true,
-```
-
-| Column      | Description                                                                                                                                                                                                                                                                                                                                    |
-| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `id`        | Required. Name of the screen, unique in the samplesheet, made of letters, digits, `.`, `_` and `-`. The curves are written to `curves/<id>.h5ad`.                                                                                                                                                                                              |
-| `wells`     | Required. Path or URL to the well table of the screen, a CSV (`.csv`) or Parquet (`.parquet`, `.pq`) file without spaces in its path.                                                                                                                                                                                                          |
-| `normalize` | Optional, `true` or `false` (default). Apply median-centric normalization to every dose-range group before fitting.                                                                                                                                                                                                                            |
-| `metadata`  | Optional. `;`-separated columns of the well table to keep per dose series in the replicate-fits table (with `--replicate_fits`), for example `date;barcode`. Every column of the well table that is neither a [well table column](#well-table) nor listed here makes drevalpy fail, so list every extra column here or drop it from the table. |
-
-An [example samplesheet](../assets/samplesheet.csv) has been provided with the pipeline.
+| Parameter     | Description                                                                                                                                                                                                                                                                                                                                      |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `--input`     | Required. Path or URL to the well table, a CSV (`.csv`) or Parquet (`.parquet`, `.pq`) file without spaces in its path.                                                                                                                                                                                                                          |
+| `--normalize` | Optional. Apply median-centric normalization to every dose-range group before fitting.                                                                                                                                                                                                                                                           |
+| `--metadata`  | Optional. Comma-separated columns of the well table to keep per dose series in the replicate-fits table (with `--replicate_fits`), for example `date,barcode`. Every column of the well table that is neither a [well table column](#well-table) nor listed here makes drevalpy fail, so list every extra column here or drop it from the table. |
 
 ### Well table
 
-Each `wells` file has one row per well:
+The well table has one row per well:
 
 | Column          | Description                                                                                                             |
 | --------------- | ----------------------------------------------------------------------------------------------------------------------- |
@@ -43,7 +34,7 @@ Each `wells` file has one row per well:
 | `replicate`     | Optional. Technical replicate (e.g. the plate) within the experiment; together they identify the dose series of a well. |
 | `position`      | Optional. Position of the well on its plate.                                                                            |
 
-Any other column has to be listed in the `metadata` column of the samplesheet. For example:
+Any other column has to be listed in `--metadata`. For example:
 
 ```csv title="wells.csv"
 sample,drug,concentration,intensity,experiment,replicate,plate_date
@@ -54,14 +45,14 @@ CL_A,DrugX,0.1,0.9206,day1,P1,2020-01-01
 
 ## Pipeline parameters
 
-Besides `--input` and `--outdir`, the parameters `--replicate_fits`, `--min_doses`, `--fit_speed` and `--max_chunk_size` control how the curves are fitted, the same for every screen of a run. They are documented in the [parameter schema](../nextflow_schema.json); run `nextflow run drevalpy/curate --help` to list them. Use `--fit_speed exhaustive` (the default) for published results.
+Besides `--input`, `--normalize`, `--metadata` and `--outdir`, the parameters `--replicate_fits`, `--min_doses`, `--fit_speed` and `--max_chunk_size` control how the curves are fitted. They are documented in the [parameter schema](../nextflow_schema.json); run `nextflow run drevalpy/curate --help` to list them. Use `--fit_speed exhaustive` (the default) for published results.
 
 ## Running the pipeline
 
 The typical command for running the pipeline is as follows:
 
 ```bash
-nextflow run drevalpy/curate --input ./samplesheet.csv --outdir ./results  -profile docker
+nextflow run drevalpy/curate --input ./wells.parquet --outdir ./results -profile docker
 ```
 
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
@@ -91,7 +82,7 @@ nextflow run drevalpy/curate -profile docker -params-file params.yaml
 with:
 
 ```yaml title="params.yaml"
-input: './samplesheet.csv'
+input: './wells.parquet'
 outdir: './results/'
 <...>
 ```
@@ -142,7 +133,7 @@ If `-profile` is not specified, the pipeline will run locally and expect `dreval
 
 - `test`
   - A profile with a complete configuration for automated testing
-  - Fits two tiny screens, one with replicates, from the test data on GitHub, so needs no other parameters
+  - Fits a tiny screen with replicates from the pipeline's test data, so needs no other parameters
 - `docker`
   - A generic configuration profile to be used with [Docker](https://docker.com/)
 - `singularity`
@@ -223,7 +214,7 @@ executor {
 ```
 
 ```bash
-nextflow run drevalpy/curate -r <version> -profile singularity -c slurm.config --input samplesheet.csv --outdir results -resume
+nextflow run drevalpy/curate -r <version> -profile singularity -c slurm.config --input wells.parquet --outdir results -resume
 ```
 
 On AWS Batch, the work directory has to be on S3. The container holds only drevalpy, so Nextflow stages task files either with the AWS CLI of the compute environment's AMI (`aws.batch.cliPath`) or with [Fusion](https://www.nextflow.io/docs/latest/fusion.html) (`fusion.enabled = true`, `wave.enabled = true`):
@@ -238,7 +229,7 @@ workDir    = 's3://my-bucket/curate/work'
 ```
 
 ```bash
-nextflow run drevalpy/curate -r <version> -profile docker -c awsbatch.config --input samplesheet.csv --outdir s3://my-bucket/curate/results -resume
+nextflow run drevalpy/curate -r <version> -profile docker -c awsbatch.config --input wells.parquet --outdir s3://my-bucket/curate/results -resume
 ```
 
 A chunk fit that runs out of memory or time is retried with twice the memory and time, then three and four times; planning and collecting a screen, which hold the whole screen in memory, are retried with twice and three times. The time a chunk takes grows with `--max_chunk_size` and `--fit_speed`; lower `--max_chunk_size` for more, shorter tasks.

@@ -8,13 +8,6 @@ nextflow_pipeline {
 
         when {
             params {
-                // The test samplesheet points to the well tables on GitHub, so that
-                // `nextflow run drevalpy/curate -profile test` works from anywhere. Point it to
-                // the checked-out copies instead, so the test also runs before they are pushed.
-                def samplesheet = new File("${launchDir}/samplesheet.csv")
-                samplesheet.text = new File("${baseDir}/assets/test/samplesheet.csv").text
-                    .replace('https://raw.githubusercontent.com/drevalpy/curate/dev/', "${baseDir}/")
-                input  = samplesheet.absolutePath
                 outdir = "$outputDir"
             }
         }
@@ -26,8 +19,8 @@ nextflow_pipeline {
             def stable_content = getAllFilesFromDir(params.outdir, ignoreFile: 'tests/.nftignore')
             assert workflow.success
             assertAll(
-                // One curve AnnData per screen; HDF5 bytes are not reproducible, so only their presence is checked
-                { assert ['screen', 'replicated'].every { id -> new File("${params.outdir}/curves/${id}.h5ad").length() > 0 } },
+                // HDF5 bytes are not reproducible, so only the curve file's presence is checked
+                { assert new File("${params.outdir}/curves.h5ad").length() > 0 },
                 { assert snapshot(
                     // Software versions, without the Nextflow version because we test pipelines on multiple Nextflow versions
                     removeNextflowVersion("$outputDir/pipeline_info/curate_software_versions.yml"),
@@ -37,6 +30,23 @@ nextflow_pipeline {
                     stable_content
                 ).match() }
             )
+        }
+    }
+
+    test("a screen without replicates, normalized") {
+
+        when {
+            params {
+                input     = "${baseDir}/assets/test/wells.csv"
+                metadata  = null
+                normalize = true
+                outdir    = "$outputDir"
+            }
+        }
+
+        then {
+            assert workflow.success
+            assert new File("${params.outdir}/curves.h5ad").length() > 0
         }
     }
 }

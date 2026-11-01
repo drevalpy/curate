@@ -10,7 +10,7 @@ The directories listed below will be created in the results directory after the 
 
 The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes data using the following steps:
 
-- [Curves](#curves) - The fitted dose-response curves of every screen
+- [Curves](#curves) - The fitted dose-response curves of the screen
 - [Pipeline information](#pipeline-information) - Report metrics generated during the workflow execution
 
 The plan and the fitted chunks are intermediate files and stay in the Nextflow work directory, where `-resume` finds them.
@@ -20,16 +20,15 @@ The plan and the fitted chunks are intermediate files and stay in the Nextflow w
 <details markdown="1">
 <summary>Output files</summary>
 
-- `curves/`
-  - `<id>.h5ad`: the curves of the screen `<id>` of the samplesheet, as an [AnnData](https://anndata.readthedocs.io) file.
+- `curves.h5ad`: the curves of the screen, as an [AnnData](https://anndata.readthedocs.io) file.
 
 </details>
 
-Each file holds one matrix of samples (`obs`) × drugs (`var`), with one pooled curve per sample and drug, fitted on all of its wells. A pair without a curve, because it was not measured, had too few doses or its fit failed, is `NaN`.
+The file holds one matrix of samples (`obs`) × drugs (`var`), with one pooled curve per sample and drug, fitted on all of its wells. A pair without a curve, because it was not measured, had too few doses or its fit failed, is `NaN`.
 
 - `X`: pEC50, the negative log10 of the EC50 in molar.
 - `layers`: one matrix per curve property, among them `EC50` and `IC50` (µM, like the input concentrations), `LN_IC50` (natural log of the IC50 in µM), `AUC`, the curve parameters (`slope`, `front`, `back`) and their errors (`pec50_error`, `slope_error`, `front_error`, `back_error`), and the fit statistics of CurveCurator (`R2`, `RMSE`, `fold_change`, `f_value`, `p_value`, `log_p_value`, `relevance_score`, `signal_quality`, `regulation`).
-- `uns["replicate_fits"]` (only with `--replicate_fits`): a table with one row per dose series. Its `experiment`, `biological_replicate` and `technical_replicate` columns place the series in the replicate hierarchy, `source` tells whether the row is the `pooled` fit or the fit of a single `replicate`, and `status` whether it was `fitted`, `fit_failed` or had `too_few_doses`. Besides the curve properties of the layers, it holds the `metadata` columns of the samplesheet row.
+- `uns["replicate_fits"]` (only with `--replicate_fits`): a table with one row per dose series. Its `experiment`, `biological_replicate` and `technical_replicate` columns place the series in the replicate hierarchy, `source` tells whether the row is the `pooled` fit or the fit of a single `replicate`, and `status` whether it was `fitted`, `fit_failed` or had `too_few_doses`. Besides the curve properties of the layers, it holds the well-table columns named by `--metadata`.
 
 Read a file in Python with:
 

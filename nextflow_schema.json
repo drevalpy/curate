@@ -9,19 +9,29 @@
             "title": "Input/output options",
             "type": "object",
             "fa_icon": "fas fa-terminal",
-            "description": "Define where the pipeline should find input data and save output data.",
+            "description": "Define the well table of the screen and where to save the curves.",
             "required": ["input", "outdir"],
             "properties": {
                 "input": {
                     "type": "string",
                     "format": "file-path",
                     "exists": true,
-                    "schema": "assets/schema_input.json",
-                    "mimetype": "text/csv",
-                    "pattern": "^\\S+\\.csv$",
-                    "description": "Path to a comma-separated file with one row per screen: id, wells and optionally normalize and metadata.",
-                    "help_text": "See docs/usage.md for the columns. Each wells table needs sample, drug, concentration and intensity, and may have experiment, replicate and position.",
+                    "pattern": "^\\S+\\.(csv|parquet|pq)$",
+                    "description": "Path to the well table of the screen (CSV or Parquet).",
+                    "help_text": "Needs the columns sample, drug, concentration and intensity, and may have experiment, replicate and position. See docs/usage.md.",
                     "fa_icon": "fas fa-file-csv"
+                },
+                "normalize": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Apply median-centric normalization to every dose-range group before fitting.",
+                    "fa_icon": "fas fa-balance-scale"
+                },
+                "metadata": {
+                    "type": "string",
+                    "pattern": "^[^,\\s]+(,[^,\\s]+)*$",
+                    "description": "Comma-separated well-table columns to keep per dose series in uns[\"replicate_fits\"], e.g. `plate_date,BARCODE`. Every other non-standard column makes drevalpy fail.",
+                    "fa_icon": "fas fa-tags"
                 },
                 "outdir": {
                     "type": "string",
@@ -35,7 +45,7 @@
             "title": "Curve fitting options",
             "type": "object",
             "fa_icon": "fas fa-chart-line",
-            "description": "How every curve of every screen is fitted. Per-screen options (normalize, metadata) are columns of the samplesheet.",
+            "description": "How every curve of the screen is fitted.",
             "properties": {
                 "replicate_fits": {
                     "type": "boolean",

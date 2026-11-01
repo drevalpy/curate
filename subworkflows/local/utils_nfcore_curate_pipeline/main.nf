@@ -9,7 +9,6 @@
 */
 
 include { UTILS_NFSCHEMA_PLUGIN     } from '../../nf-core/utils_nfschema_plugin'
-include { samplesheetToList         } from 'plugin/nf-schema'
 include { completionSummary         } from '../../nf-core/utils_nfcore_pipeline'
 include { UTILS_NFCORE_PIPELINE     } from '../../nf-core/utils_nfcore_pipeline'
 include { UTILS_NEXTFLOW_PIPELINE   } from '../../nf-core/utils_nextflow_pipeline'
@@ -28,7 +27,7 @@ workflow PIPELINE_INITIALISATION {
     monochrome_logs   // boolean: Do not use coloured log outputs
     nextflow_cli_args //   array: List of positional nextflow CLI args
     outdir            //  string: The output directory where the results will be saved
-    input             //  string: Path to input samplesheet
+    input             //  string: Path to the well table
     help              // boolean: Display help message and exit
     help_full         // boolean: Show the full help message
     show_hidden       // boolean: Show hidden parameters in the help message
@@ -57,7 +56,7 @@ workflow PIPELINE_INITIALISATION {
         before_text = before_text.replaceAll(/\033\[[0-9;]*m/, '')
     }
 
-    command = "nextflow run ${workflow.manifest.name} -profile <docker/singularity/.../institute> --input samplesheet.csv --outdir <OUTDIR>"
+    command = "nextflow run ${workflow.manifest.name} -profile <docker/singularity/.../institute> --input wells.parquet --outdir <OUTDIR>"
 
     UTILS_NFSCHEMA_PLUGIN (
         workflow,
@@ -79,19 +78,10 @@ workflow PIPELINE_INITIALISATION {
         nextflow_cli_args
     )
 
-    //
-    // Create channel from input file provided through params.input
-    //
-
-    channel
-        .fromList(samplesheetToList(input, "${projectDir}/assets/schema_input.json"))
-        .map { meta, wells ->
-            [ meta + [ metadata: meta.metadata ? meta.metadata.tokenize(';') : [] ], wells ]
-        }
-        .set { ch_samplesheet }
+    def ch_wells = channel.value(file(input, checkIfExists: true))
 
     emit:
-    samplesheet = ch_samplesheet
+    wells       = ch_wells
     versions    = ch_versions
 }
 

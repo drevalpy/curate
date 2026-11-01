@@ -1,3 +1,0 @@
-id,wells,normalize,metadata
-GDSC2,/path/to/wells/GDSC2.parquet,false,date;barcode
-PRISM,/path/to/wells/PRISM.parquet,true,
