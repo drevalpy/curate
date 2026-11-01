@@ -16,7 +16,7 @@ Initial release of drevalpy/curate, created with the [nf-core](https://nf-co.re/
 - Parameters `--replicate_fits`, `--min_doses`, `--fit_speed` and `--max_chunk_size`.
 - Fits reproducible across x86-64 nodes with AVX2 by pinning `OPENBLAS_CORETYPE=Haswell` and single-threaded BLAS.
 - Retries with more memory and time for chunk fits and whole-screen steps.
-- `Dockerfile` for the `ghcr.io/drevalpy/curate` container, with the AWS CLI for AWS Batch, and a GitHub Actions workflow building it against the drevalpy ref in `DREVALPY_REF` (`v2.0.0`, a placeholder until drevalpy 2.0.0 is released).
+- `Dockerfile` for the `ghcr.io/drevalpy/curate` container (drevalpy only), and a GitHub Actions workflow building it against the drevalpy ref in `DREVALPY_REF`.
 - `test` and `test_full` profiles and an nf-test pipeline test.
 
 ### `Fixed`

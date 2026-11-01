@@ -59,7 +59,7 @@ executor {
 }
 ```
 
-or for AWS Batch (the pipeline container includes the AWS CLI, so the compute environment needs no custom AMI):
+or for AWS Batch (the work directory must be on S3, and Nextflow needs the AWS CLI on the compute environment's AMI, given by `aws.batch.cliPath`, or Fusion):
 
 ```groovy title="awsbatch.config"
 process {

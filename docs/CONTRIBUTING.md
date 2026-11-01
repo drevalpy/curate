@@ -151,10 +151,10 @@ If you update images or graphics, follow the nf-core [style guidelines](https://
 
 ### Container
 
-Every process runs in `ghcr.io/drevalpy/curate:<manifest.version>`, built from the [`Dockerfile`](../Dockerfile) against the drevalpy git ref in [`DREVALPY_REF`](../DREVALPY_REF). `DREVALPY_REF` holds a single git ref, currently `v2.0.0`, which is a placeholder until drevalpy 2.0.0 is released. To move the pipeline to another drevalpy release, change `DREVALPY_REF` and rebuild the image, locally with
+Every process runs in `ghcr.io/drevalpy/curate:<manifest.version>`, built from the [`Dockerfile`](../Dockerfile) against the drevalpy git ref in [`DREVALPY_REF`](../DREVALPY_REF). `DREVALPY_REF` holds a single git ref, currently a commit of the drevalpy v2 branches until drevalpy 2.0.0 is released. To move the pipeline to another drevalpy release, change `DREVALPY_REF` and rebuild the image, locally with
 
 ```bash
-docker build --build-context drevalpy=https://github.com/daisybio/drevalpy.git#$(cat DREVALPY_REF) -t ghcr.io/drevalpy/curate:<version> .
+docker build --build-arg DREVALPY_REF=$(cat DREVALPY_REF) -t ghcr.io/drevalpy/curate:<version> .
 ```
 
 or by running the `Build container` GitHub Actions workflow, which also runs on every release.
