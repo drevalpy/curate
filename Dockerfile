@@ -9,7 +9,7 @@ COPY --from=ghcr.io/astral-sh/uv:0.13 /uv /usr/local/bin/uv
 RUN apt-get update \
     && apt-get install -y --no-install-recommends git procps \
     && rm -rf /var/lib/apt/lists/*
-ARG DREVALPY_REF=81437c08be220eb7d1d5282d46be1a07652a3ac9
+ARG DREVALPY_REF=a8b969af2ee1de06c08cd85e460e9bcf53c08a74
 RUN git clone --filter=blob:none https://github.com/daisybio/drevalpy.git /opt/drevalpy \
     && git -C /opt/drevalpy checkout --quiet "$DREVALPY_REF" \
     && UV_PROJECT_ENVIRONMENT=/opt/venv uv sync --project /opt/drevalpy --frozen --no-dev --no-editable --extra cpu \

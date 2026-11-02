@@ -13,7 +13,7 @@
                     "drevalpy": "2.0.0"
                 },
                 "Workflow": {
-                    "drevalpy/curate": "v0.1.0"
+                    "drevalpy/curate": "v0.1.1"
                 }
             },
             [
